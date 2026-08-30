@@ -37,6 +37,7 @@ export default function SearchInput({
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
+        maxFontSizeMultiplier={1.3}
         style={[
           styles.input,
           {

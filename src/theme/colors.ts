@@ -28,7 +28,7 @@ export const lightColors: Colors = {
   success: '#17B26A',
   warning: '#F79009',
   danger: '#F04438',
-  pink: '#FFE7E3',
+  pink: '#FFC9C1',
   gray: '#C5C5C5',
   CoralRed: '#DE4631',
   CoralRed2: '#DE4631',
@@ -37,7 +37,7 @@ export const lightColors: Colors = {
 
 export const darkColors: Colors = {
   background: '#0F131B',
-  card: '#181D27',
+  card: '#252836',
   text: '#F3F4F6',
   textMuted: '#9AA3B2',
   border: '#3A4150',
@@ -46,11 +46,11 @@ export const darkColors: Colors = {
   success: '#17B26A',
   warning: '#F79009',
   danger: '#F04438',
-  pink: '#3A211C',
+  pink: '#4A2E35',
   gray: '#3A4150',
   CoralRed: '#DE4631',
   CoralRed2: '#DE4631',
-  CharcoalGray: '#585757',
+  CharcoalGray: '#E8E9ED',
 };
 
 export function withAlpha(hex: string, alpha: number) {

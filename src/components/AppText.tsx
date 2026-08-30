@@ -23,6 +23,7 @@ export default function AppText({
 
   return (
     <Text
+      maxFontSizeMultiplier={1.3}
       {...rest}
       style={[
         {

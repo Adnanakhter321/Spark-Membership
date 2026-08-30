@@ -25,7 +25,9 @@ export default function Button({ title, onPress, iconRight, style }: Props) {
       accessibilityRole="button"
       style={[styles.button, style]}
     >
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title} numberOfLines={1} maxFontSizeMultiplier={1.3}>
+        {title}
+      </Text>
       {iconRight ? (
         <Ionicons name={iconRight} size={r.scale(16)} color={theme.colors.onPrimary} />
       ) : null}

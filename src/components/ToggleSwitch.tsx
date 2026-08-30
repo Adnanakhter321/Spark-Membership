@@ -65,6 +65,7 @@ export default function ToggleSwitch({
       >
         <Animated.Text
           numberOfLines={1}
+          maxFontSizeMultiplier={1.3}
           style={[
             styles.label,
             {

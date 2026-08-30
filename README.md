@@ -1,97 +1,129 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Spark Roster
 
-# Getting Started
+A React Native app that shows a gym's class rosters for the day. It loads the
+classes and their members from an API, lets you search a member by name or ID,
+and adapts from a phone to a large tablet in both orientations. Light and dark
+mode are both supported.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Built with React Native 0.87 (New Architecture), TypeScript and Redux Toolkit.
 
-## Step 1: Start Metro
+## Requirements
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Node 22.11 or newer
+- Yarn
+- Xcode 16+ with CocoaPods (iOS)
+- Android Studio with JDK 17 (Android)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Setup
 
 ```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+yarn
 ```
 
-## Step 2: Build and run your app
+The API base URL lives in `.env`:
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```
+API_BASE_URL=https://api.mockfly.dev/mocks/<mock-id>
+API_TIMEOUT=20000
+```
 
-### Android
+`.env` is committed on purpose here, so the project runs straight after
+cloning - the endpoint is the public mock API this assessment was given
+against, not a secret. On a real project this file stays out of git and
+`.env.example` is the template.
+
+iOS also needs the pods:
 
 ```sh
-# Using npm
-npm run android
+cd ios && pod install && cd ..
+```
 
-# OR using Yarn
+## Running
+
+```sh
+yarn start        # Metro
 yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Release build for Android: `yarn installr`.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## What the screen does
 
-## Step 3: Modify your app
+- Loads the roster from `GET {API_BASE_URL}/contacts`
+- Search matches a class name, a member name or a member ID, on the data
+  already in the store, so typing never hits the network
+- Separate states for loading, API error (with retry), no classes, and no
+  search results
+- Pull to refresh keeps the list on screen instead of showing a full spinner
+- Instructor mode reveals the present / absent actions on every member
+- Classes with no members are not shown
+- Member avatars are cached on disk and fall back to a local placeholder if
+  the image is missing or fails to load
 
-Now that you have successfully run the app, let's make changes!
+## Project structure
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+```
+src/
+  api/                 axios instance, error to message mapping
+  assets/              fonts, images, splash logo
+  components/          shared UI: text, button, search, toggle, class card
+  config/              env values
+  features/roster/
+    domain/            entities, repository interface, use cases
+    data/              API DTOs, mapper, repository implementation
+    presentation/      redux slice, screen state hook, screen
+  navigation/          stack navigator and routes
+  store/               redux store and typed hooks
+  theme/               colors, fonts, spacing, responsive helpers
+  types/               ambient type declarations
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Architecture
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+The roster feature follows Clean Architecture, so the dependencies point
+inwards:
 
-## Congratulations! :tada:
+```
+presentation  ---->  domain  <----  data
+   (screen)          (rules)        (API)
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+- **domain** is plain TypeScript. It imports no React, no Redux and no axios.
+  It holds the entities, a `RosterRepository` interface, and the use cases
+  (`getActiveClasses`, `searchRoster`, `countMembers`).
+- **data** is the only place that knows the API exists. The mapper turns the
+  response into the app's own entities, so field names like
+  `classRosterAttendeeID` never leak past this folder.
+- **presentation** draws and dispatches. The thunk calls a use case and stores
+  the result; it holds no rules of its own.
 
-### Now what?
+Inside the presentation layer, `useRoster.ts` holds everything the screen
+needs - the data, the derived states and the actions - so `RosterScreen.tsx`
+only renders. Because the use cases receive the repository as an argument
+instead of importing it, the rules can be tested with a fake repository and
+no network.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Responsiveness
 
-# Troubleshooting
+`src/theme/responsive.ts` exposes `scale()` for sizes and `fontSize()` for
+type, both derived from the device's short side against an 834pt tablet
+design. Styles are written through `makeStyles((theme, r) => ...)`, which
+gives every component the current theme and those helpers, and re-runs on
+rotation. The class card derives its column count from the available width
+instead of hardcoding one, so the same card shows three members per row on a
+phone and nine on a large tablet, with equal spacing on both edges.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## Libraries
 
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+| Library | Why |
+|---|---|
+| `@reduxjs/toolkit`, `react-redux` | predictable shared state, thunks for the API call |
+| `axios` | interceptable HTTP client with timeouts and typed responses |
+| `@shopify/flash-list` | keeps long rosters smooth |
+| `@d11/react-native-fast-image` | disk and memory caching for member avatars |
+| `react-native-vector-icons` | icons on both platforms without shipping images |
+| `@react-navigation/native-stack` | native stack, ready for the screens that follow |
+| `react-native-safe-area-context` | notch and edge-to-edge handling |
+| `react-native-bootsplash` | splash screen on Android 12+ and iOS |
+| `react-native-dotenv` | keeps the API URL out of the source |

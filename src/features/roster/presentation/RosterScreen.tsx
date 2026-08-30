@@ -1,42 +1,142 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText, Button, IconButton, SearchInput, ToggleSwitch } from '@/components';
-import { makeStyles } from '@/theme';
-import AppImageBackground from '@/components/AppImageBackground';
 import { images } from '@/assets/images';
+import { AppText, Button, IconButton, SearchInput, ToggleSwitch } from '@/components';
+import AppImageBackground from '@/components/AppImageBackground';
 import TraditionalKarate, { type ClassMember } from '@/components/TraditionalKarate';
+import { makeStyles, useTheme, withAlpha } from '@/theme';
 
-const avatar = (gender: 'men' | 'women', n: number) => ({
-  uri: `https://randomuser.me/api/portraits/${gender}/${n}.jpg`,
-});
+import { useRoster } from './useRoster';
 
-const DEMO_MEMBERS: ClassMember[] = [
-  { id: '1', name: 'Jenny Wilson', photo: images.dummyImage, showActions: true },
-  { id: '2', name: 'Marvin McKinney', photo: avatar('men', 32), showActions: true },
-  { id: '3', name: 'Brooklyn Simmons', photo: avatar('women', 68), showActions: true },
-  { id: '7', name: 'Jenny Wilson' },
-  { id: '4', name: 'Ralph Edwards', photo: avatar('men', 75), showActions: true },
-  { id: '5', name: 'Ralph Edwards', photo: avatar('men', 54) },
-  { id: '6', name: 'Floyd Miles', photo: avatar('men', 86) },
-  { id: '8', name: 'Marvin McKinney', photo: avatar('men', 32) },
-  { id: '9', name: 'Brooklyn Simmons', photo: avatar('women', 68) },
-];
+type StateMessageProps = {
+  title: string;
+  message: string;
+  actionTitle?: string;
+  onAction?: () => void;
+};
 
-const DEMO_CLASSES = [
-  { id: 'c1', title: 'Traditional Karate', time: '5:30 PM - 6:30 PM', members: DEMO_MEMBERS },
-  { id: 'c2', title: 'Traditional Karate', time: '5:30 PM - 6:30 PM', members: DEMO_MEMBERS.slice(0, 6) },
-  { id: 'c3', title: 'Traditional Karate', time: '5:30 PM - 6:30 PM', members: DEMO_MEMBERS.slice(0, 6) },
-  { id: 'c4', title: 'Traditional Karate', time: '5:30 PM - 6:30 PM', members: DEMO_MEMBERS.slice(0, 6) },
-];
+function StateMessage({ title, message, actionTitle, onAction }: StateMessageProps) {
+  const styles = useStyles();
+  return (
+    <View style={styles.centered}>
+      <View style={styles.panel}>
+        <AppText size="lg" weight="semiBold" style={styles.textCenter}>
+          {title}
+        </AppText>
+        <AppText color="textMuted" style={styles.message}>
+          {message}
+        </AppText>
+        {actionTitle && onAction ? (
+          <View style={styles.action}>
+            <Button title={actionTitle} onPress={onAction} />
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+type ClassCard = {
+  id: string;
+  title: string;
+  time: string;
+  members: ClassMember[];
+};
 
 export function RosterScreen() {
   const styles = useStyles();
+  const theme = useTheme();
+  const roster = useRoster();
 
   const [instructorMode, setInstructorMode] = useState(false);
-  const [query, setQuery] = useState('');
+
+  const classes = useMemo(
+    () =>
+      roster.classes.map(item => ({
+        id: item.id,
+        title: item.name,
+        time: item.time,
+        members: item.members.map(member => ({
+          id: member.id,
+          name: member.name,
+          photo: member.photo ? { uri: member.photo } : null,
+          showActions: instructorMode,
+        })),
+      })),
+    [roster.classes, instructorMode],
+  );
+
+  const renderClass = useCallback(
+    ({ item }: { item: ClassCard }) => (
+      <TraditionalKarate title={item.title} time={item.time} members={item.members} />
+    ),
+    [],
+  );
+
+  const renderContent = useCallback(() => {
+    if (roster.loading) {
+      return (
+        <View style={styles.centered}>
+          <View style={styles.panel}>
+            <ActivityIndicator size="large" color={theme.colors.CoralRed2} />
+          </View>
+        </View>
+      );
+    }
+
+    if (roster.error) {
+      return (
+        <StateMessage
+          title="Could not load the roster"
+          message={roster.error.message}
+          actionTitle={roster.error.canRetry ? 'Try again' : undefined}
+          onAction={roster.error.canRetry ? roster.reload : undefined}
+        />
+      );
+    }
+
+    if (roster.isEmpty) {
+      return (
+        <StateMessage
+          title="No classes today"
+          message="Classes will show up here once they are scheduled."
+          actionTitle="Refresh"
+          onAction={roster.reload}
+        />
+      );
+    }
+
+    if (roster.hasNoMatches) {
+      return (
+        <StateMessage
+          title="No results"
+          message={`Nothing matched "${roster.query}". Try another name or ID.`}
+        />
+      );
+    }
+
+    return (
+      <FlashList
+        data={classes}
+        keyExtractor={item => item.id}
+        renderItem={renderClass}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={roster.refreshing}
+            onRefresh={roster.reload}
+            tintColor={theme.colors.onPrimary}
+            colors={[theme.colors.CoralRed2]}
+          />
+        }
+      />
+    );
+  }, [classes, renderClass, roster, styles, theme]);
 
   return (
     <SafeAreaView
@@ -50,7 +150,11 @@ export function RosterScreen() {
         </View>
 
         <View style={styles.searchRow}>
-          <SearchInput value={query} onChangeText={setQuery} />
+          <SearchInput
+            value={roster.query}
+            onChangeText={roster.onChangeQuery}
+            style={styles.search}
+          />
           <Button title="All Rosters" iconRight="chevron-down" />
           <IconButton name="settings-outline" accessibilityLabel="Roster settings" />
         </View>
@@ -58,19 +162,7 @@ export function RosterScreen() {
 
       <View style={styles.list}>
         <AppImageBackground source={images.bgImage} style={styles.background}>
-          <FlashList
-            data={DEMO_CLASSES}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <TraditionalKarate
-                title={item.title}
-                time={item.time}
-                members={item.members}
-              />
-            )}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
+          {renderContent()}
         </AppImageBackground>
       </View>
     </SafeAreaView>
@@ -80,7 +172,6 @@ export function RosterScreen() {
 const useStyles = makeStyles((theme, r) => ({
   screen: {
     flex: 1,
-
     backgroundColor: theme.colors.card,
   },
   screenActive: {
@@ -99,12 +190,17 @@ const useStyles = makeStyles((theme, r) => ({
     alignItems: 'center',
     alignSelf: 'center',
     gap: r.scale(theme.spacing.xl),
+    marginVertical:r.scale(theme.spacing.sm),
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: r.scale(theme.spacing.md),
     marginTop: r.scale(theme.spacing.lg),
+  },
+  search: {
+    minWidth: r.scale(220),
   },
   list: {
     flex: 1,
@@ -114,5 +210,29 @@ const useStyles = makeStyles((theme, r) => ({
   },
   listContent: {
     paddingVertical: r.scale(theme.spacing.sm),
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: r.scale(theme.spacing.xl),
+  },
+  panel: {
+    alignItems: 'center',
+    backgroundColor: withAlpha(theme.colors.card, 0.95),
+    borderRadius: r.scale(12),
+    paddingVertical: r.scale(theme.spacing.xl),
+    paddingHorizontal: r.scale(theme.spacing.xxl),
+    maxWidth: r.scale(420),
+  },
+  textCenter: {
+    textAlign: 'center',
+  },
+  message: {
+    marginTop: r.scale(theme.spacing.sm),
+    textAlign: 'center',
+  },
+  action: {
+    marginTop: r.scale(theme.spacing.lg),
   },
 }));
