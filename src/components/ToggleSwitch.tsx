@@ -31,7 +31,6 @@ export default function ToggleSwitch({
     Animated.timing(progress, {
       toValue: value ? 1 : 0,
       duration: 220,
-
       useNativeDriver: false,
     }).start();
   }, [value, progress]);
@@ -55,7 +54,6 @@ export default function ToggleSwitch({
             width,
             height,
             borderRadius: height / 2,
-
             backgroundColor: between(
               withAlpha(theme.colors.textMuted, 0.22),
               withAlpha(theme.colors.primary, 0.18),
@@ -73,7 +71,6 @@ export default function ToggleSwitch({
               fontSize: r.fontSize(theme.fontSize.lg),
               color: between(theme.colors.textMuted, theme.colors.primary),
               marginHorizontal: r.scale(value ? theme.spacing.xl : theme.spacing.lg),
-
               transform: [{ translateX: between(knob * 0.85, 0) }],
             },
           ]}

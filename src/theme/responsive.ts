@@ -3,8 +3,6 @@ import { PixelRatio, useWindowDimensions } from 'react-native';
 
 const DESIGN_WIDTH = 834;
 
-const TABLET_MIN_WIDTH = 600;
-
 export type Responsive = ReturnType<typeof useResponsive>;
 
 export function useResponsive() {
@@ -21,13 +19,6 @@ export function useResponsive() {
 
     const fontSize = (n: number) => round(n + (n * ratio - n) * 0.4);
 
-    return {
-      width,
-      height,
-      isTablet: shortSide >= TABLET_MIN_WIDTH,
-      isLandscape: width > height,
-      scale,
-      fontSize,
-    };
+    return { width, height, scale, fontSize };
   }, [width, height]);
 }

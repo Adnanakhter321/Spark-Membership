@@ -6,6 +6,7 @@ import { images } from '@/assets/images';
 import { makeStyles, withAlpha } from '@/theme';
 
 import AppText from './AppText';
+
 export type ClassMember = {
     id: string;
     name: string;

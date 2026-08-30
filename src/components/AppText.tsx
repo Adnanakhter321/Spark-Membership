@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, type TextProps, type TextStyle } from 'react-native';
+import { Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
 
 import { useResponsive, useTheme, type Colors, type Theme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -8,7 +8,7 @@ type Props = TextProps & {
   size?: keyof Theme['fontSize'];
   weight?: keyof typeof fonts;
   color?: keyof Colors;
-  style?: TextStyle | TextStyle[];
+  style?: StyleProp<TextStyle>;
 };
 
 export default function AppText({

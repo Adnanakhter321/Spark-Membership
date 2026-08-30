@@ -19,7 +19,6 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <Provider store={store}>
         <SafeAreaProvider>
-
           <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} animated />
           <RootNavigator />
         </SafeAreaProvider>

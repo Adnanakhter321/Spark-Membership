@@ -113,7 +113,7 @@ export function RosterScreen() {
       return (
         <StateMessage
           title="No results"
-          message={`Nothing matched "${roster.query}". Try another name or ID.`}
+          message={`Nothing matched "${roster.query}". Try another name, ID`}
         />
       );
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, type ViewStyle } from 'react-native';
+import { TouchableOpacity, type StyleProp, type ViewStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { makeStyles, useResponsive, useTheme } from '@/theme';
@@ -10,7 +10,7 @@ type Props = {
   name: IconName;
   onPress?: () => void;
   accessibilityLabel?: string;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function IconButton({ name, onPress, accessibilityLabel, style }: Props) {

@@ -21,7 +21,6 @@ export function RootNavigator() {
         initialRouteName={Routes.Roster}
         screenOptions={{
           headerShown: false,
-
           animation: 'slide_from_right',
         }}
       >

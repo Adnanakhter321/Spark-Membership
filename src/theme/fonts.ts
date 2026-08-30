@@ -5,5 +5,3 @@ export const fonts = {
   semiBold: 'Inter18pt-SemiBold',
   bold: 'Inter18pt-Bold',
 } as const;
-
-export type FontFamily = keyof typeof fonts;

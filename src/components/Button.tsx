@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity, type ViewStyle } from 'react-native';
+import { Text, TouchableOpacity, type StyleProp, type ViewStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { makeStyles, useResponsive, useTheme } from '@/theme';
@@ -10,7 +10,7 @@ type Props = {
   title: string;
   onPress?: () => void;
   iconRight?: IconName;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function Button({ title, onPress, iconRight, style }: Props) {

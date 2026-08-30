@@ -48,6 +48,12 @@ yarn ios
 
 Release build for Android: `yarn installr`.
 
+Tests:
+
+```sh
+yarn test
+```
+
 ## What the screen does
 
 - Loads the roster from `GET {API_BASE_URL}/contacts`

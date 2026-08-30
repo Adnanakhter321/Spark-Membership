@@ -79,3 +79,7 @@ yarn-error.log
 
 # local notes
 docs/
+
+# archives
+*.zip
+_to_delete/

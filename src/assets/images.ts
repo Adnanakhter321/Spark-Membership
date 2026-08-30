@@ -10,5 +10,3 @@ export const images = {
   cross: require('./images/cross.png'),
   defaultUser: require('./images/default_user.png'),
 } satisfies Record<string, ImageRequireSource>;
-
-export type ImageKey = keyof typeof images;

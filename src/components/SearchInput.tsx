@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, TextInput, View, type ViewStyle } from 'react-native';
+import { Image, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { images } from '@/assets/images';
 import { makeStyles, useResponsive, useTheme } from '@/theme';
@@ -8,7 +8,7 @@ type Props = {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function SearchInput({
@@ -23,7 +23,6 @@ export default function SearchInput({
 
   return (
     <View style={[styles.wrapper, style]}>
-
       <Image
         source={images.search}
         resizeMode="contain"
@@ -66,7 +65,6 @@ const useStyles = makeStyles((theme, r) => ({
   },
   input: {
     flex: 1,
-
     padding: 0,
   },
 }));
