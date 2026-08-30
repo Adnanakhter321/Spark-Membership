@@ -172,7 +172,7 @@ const useStyles = makeStyles((theme, r) => {
         alignContent: 'flex-start',
     },
     member: {
-        width: columnWidth,
+        width: columnWidth, //
         alignSelf: 'flex-start',
         gap: r.scale(6),
         alignItems: 'center',
