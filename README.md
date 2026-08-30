@@ -110,6 +110,11 @@ only renders. Because the use cases receive the repository as an argument
 instead of importing it, the rules can be tested with a fake repository and
 no network.
 
+`rosterDependencies.ts` is the single place that says which implementation is
+in use, so pointing the app at a different API means changing the base URL in
+`.env`, the field names in `data/rosterMapper.ts`, and nothing else - the
+screen, the state and the rules stay untouched.
+
 ## Responsiveness
 
 `src/theme/responsive.ts` exposes `scale()` for sizes and `fontSize()` for
