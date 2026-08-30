@@ -73,3 +73,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# local env
+.env
+.env.local
+
+# local notes
+docs/
